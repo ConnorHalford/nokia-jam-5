@@ -1,0 +1,27 @@
+84x48
+LIGHT	#C7F0D8		(199, 240, 216)
+DARK	#43523D		( 67,  82,  61)
+one audio channel
+
+TODO:
++ Git repo setup
++ Unity project setup
++ Render at target resolution
+- Card art and rendering
+- Deck shuffling
+- Card stacking and movement
+- Dealing and revealing the tableau
+- Drawing cards from the stock
+- Passing through the stock multiple times
+- Building on the foundations
+- Taking back from the foundations
+- Moving into empty tableau places
+- Winning the game
+- Reshuffle and restart
+- Options
+	- Draw 1, 2 or 3 cards from stock
+	- Place Kings or any cards in empty tableau
+	- Allowed to take cards back from foundations
+	- Tableau cards hidden or empty
+- Auto-finish when all cards stacked
+- SFX (one audio channel)
