@@ -8,14 +8,14 @@ TODO:
 + Unity project setup
 + Render at target resolution
 + Card art and rendering
-- Deck shuffling
-- Card stacking and movement
++ Deck shuffling
 - Dealing and revealing the tableau
+- Moving into empty tableau places
+- Card stacking and movement
 - Drawing cards from the stock
 - Passing through the stock multiple times
 - Building on the foundations
 - Taking back from the foundations
-- Moving into empty tableau places
 - Winning the game
 - Reshuffle and restart
 - Options

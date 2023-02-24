@@ -4,10 +4,10 @@ namespace Solitaire
 {
 	public enum Suit	// Must be alphabetical to match sprite atlas sub-sprites being alphabetised
 	{
-		Clubs,
-		Diamonds,
-		Hearts,
-		Spades
+		Clubs = 0,
+		Diamonds = 1,
+		Hearts = 2,
+		Spades = 3
 	}
 
 	public class Card : MonoBehaviour
@@ -22,6 +22,23 @@ namespace Solitaire
 		private void OnEnable()
 		{
 			UpdateArt();
+		}
+
+		public void Init(Suit suit, int value)
+		{
+			_suit = suit;
+			_value = value;
+			_visible = false;
+			UpdateArt();
+		}
+
+		public void SetVisible(bool visible)
+		{
+			if (_visible != visible)
+			{
+				_visible = visible;
+				UpdateArt();
+			}
 		}
 
 		private void UpdateArt()
@@ -41,6 +58,23 @@ namespace Solitaire
 				index = BACK_OFFSET + (_value - 1) + ((int)_suit * SPRITES_PER_SUIT);
 			}
 			_sprite.sprite = _cardSprites[index];
+
+#if UNITY_EDITOR
+			// Give the GameObject a nice name in the hierarchy
+			System.Text.StringBuilder sb = new System.Text.StringBuilder();
+			sb.Append("Card: ");
+			switch (_value)
+			{
+				case 1:		sb.Append("Ace");	break;
+				case 11:	sb.Append("Jack");	break;
+				case 12:	sb.Append("Queen");	break;
+				case 13:	sb.Append("King");	break;
+				default:	sb.Append(_value);	break;
+			}
+			sb.Append(" of ");
+			sb.Append(_suit);
+			gameObject.name = sb.ToString();
+#endif	// UNITY_EDITOR
 		}
 
 #if UNITY_EDITOR
