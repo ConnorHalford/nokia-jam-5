@@ -7,7 +7,7 @@ TODO:
 + Git repo setup
 + Unity project setup
 + Render at target resolution
-- Card art and rendering
++ Card art and rendering
 - Deck shuffling
 - Card stacking and movement
 - Dealing and revealing the tableau
