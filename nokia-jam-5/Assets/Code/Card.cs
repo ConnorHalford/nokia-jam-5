@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+using static Solitaire.Locations;
+
 namespace Solitaire
 {
 	public enum Suit	// Must be alphabetical to match sprite atlas sub-sprites being alphabetised
@@ -15,30 +17,100 @@ namespace Solitaire
 		[SerializeField] private Sprite[] _cardSprites = null;
 		[SerializeField] private Suit _suit = Suit.Spades;
 		[SerializeField] private int _value = 1;
-		[SerializeField] private bool _visible = true;
+		[SerializeField] private bool _faceUp = true;
 
 		private SpriteRenderer _sprite = null;
+		private Location _location = Location.Stock;
+		private Card _cardBelowThis = null;
+		private Card _cardAboveThis = null;
 
-		private void OnEnable()
+		public int RenderOrder	// Higher number is in front
 		{
-			UpdateArt();
+			get { return _sprite.sortingOrder; }
+			set { _sprite.sortingOrder = value; }
 		}
 
 		public void Init(Suit suit, int value)
 		{
 			_suit = suit;
 			_value = value;
-			_visible = false;
+			_faceUp = false;
+			_location = Location.Stock;
 			UpdateArt();
+			RenderOrder = 0;
 		}
 
-		public void SetVisible(bool visible)
+		public void SetFaceUp(bool faceUp)
 		{
-			if (_visible != visible)
+			if (_faceUp != faceUp)
 			{
-				_visible = visible;
+				_faceUp = faceUp;
 				UpdateArt();
 			}
+		}
+
+		public void SetLocation(Location location, Card cardBelow)
+		{
+			_location = location;
+			_cardBelowThis = cardBelow;
+			if (_cardBelowThis != null)
+			{
+				_cardBelowThis._cardAboveThis = this;
+				RenderOrder = _cardBelowThis.RenderOrder + 1;
+				transform.position = _cardBelowThis.transform.position + CARD_Y_OFFSET;
+			}
+			else	// Vacant space
+			{
+				RenderOrder = 0;
+				switch (_location)
+				{
+					case Location.Stock:		transform.position = POS_STOCK;			break;
+					case Location.Waste1:		transform.position = POS_WASTE1;		break;
+					case Location.Waste2:		transform.position = POS_WASTE2;		break;
+					case Location.Waste3:		transform.position = POS_WASTE3;		break;
+					case Location.Foundation1:	transform.position = POS_FOUNDATION1;	break;
+					case Location.Foundation2:	transform.position = POS_FOUNDATION2;	break;
+					case Location.Foundation3:	transform.position = POS_FOUNDATION3;	break;
+					case Location.Foundation4:	transform.position = POS_FOUNDATION4;	break;
+					case Location.Depot1:		transform.position = POS_DEPOT1;		break;
+					case Location.Depot2:		transform.position = POS_DEPOT2;		break;
+					case Location.Depot3:		transform.position = POS_DEPOT3;		break;
+					case Location.Depot4:		transform.position = POS_DEPOT4;		break;
+					case Location.Depot5:		transform.position = POS_DEPOT5;		break;
+					case Location.Depot6:		transform.position = POS_DEPOT6;		break;
+					case Location.Depot7:		transform.position = POS_DEPOT7;		break;
+				}
+			}
+		}
+
+		public Card GetTopmost()
+		{
+			Card topmost = this;
+			while (topmost._cardAboveThis != null)
+			{
+				topmost = topmost._cardAboveThis;
+			}
+			return topmost;
+		}
+
+		private bool InStock()
+		{
+			return IsStock(_location);
+		}
+
+		private bool InWaste()
+		{
+			return IsWaste(_location);
+		}
+
+		private bool InFoundation()
+		{
+			return IsFoundation(_location);
+		}
+
+		private bool InDepot()
+		{
+			return IsDepot(_location);
 		}
 
 		private void UpdateArt()
@@ -51,7 +123,7 @@ namespace Solitaire
 			// Therefore the Suit enum is also alphabetical to allow simple indexing with the following order:
 			// Back, Clubs 1-13 + Blank, Diamonds 1-13 + Blank, Hearts 1-13 + Blank, Spades 1-13 + Blank
 			int index = 0;
-			if (_visible)
+			if (_faceUp)
 			{
 				const int BACK_OFFSET = 1;
 				const int SPRITES_PER_SUIT = 14;	// 13 values + blank

@@ -104,7 +104,7 @@ MonoBehaviour:
   - {fileID: -4423995419813799855, guid: 2e863dc05b191bb4ebfcd025f3ce7840, type: 3}
   _suit: 0
   _value: 1
-  _visible: 1
+  _faceUp: 1
 --- !u!212 &8798053335449807419
 SpriteRenderer:
   m_ObjectHideFlags: 0
