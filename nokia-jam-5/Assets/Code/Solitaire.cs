@@ -10,6 +10,8 @@ namespace Solitaire
 	public class Solitaire : MonoBehaviour
 	{
 		[SerializeField] private Card _cardPrefab = null;
+		[SerializeField] private Transform _cardParent = null;
+		[SerializeField] private SpriteRenderer[] _emptyMarkers = null;
 
 		private Card[] _deck = null;
 		private List<Card> _stock = null;
@@ -20,6 +22,21 @@ namespace Solitaire
 
 		private void Awake()
 		{
+			// Mark possible card locations
+			_emptyMarkers[0].transform.position = POS_STOCK;
+			_emptyMarkers[1].transform.position = POS_WASTE1;
+			_emptyMarkers[2].transform.position = POS_FOUNDATION1;
+			_emptyMarkers[3].transform.position = POS_FOUNDATION2;
+			_emptyMarkers[4].transform.position = POS_FOUNDATION3;
+			_emptyMarkers[5].transform.position = POS_FOUNDATION4;
+			_emptyMarkers[6].transform.position = POS_DEPOT1;
+			_emptyMarkers[7].transform.position = POS_DEPOT2;
+			_emptyMarkers[8].transform.position = POS_DEPOT3;
+			_emptyMarkers[9].transform.position = POS_DEPOT4;
+			_emptyMarkers[10].transform.position = POS_DEPOT5;
+			_emptyMarkers[11].transform.position = POS_DEPOT6;
+			_emptyMarkers[12].transform.position = POS_DEPOT7;
+
 			// Make all the cards
 			_deck = new Card[NUM_CARDS_IN_DECK];
 			int cardIndex = 0;
@@ -28,14 +45,14 @@ namespace Solitaire
 				Suit suit = (Suit)suitIndex;
 				for (int value = 1; value <= 13; ++value)
 				{
-					Card card = Instantiate(_cardPrefab);
+					Card card = Instantiate(_cardPrefab, _cardParent);
 					card.Init(suit, value);
 					_deck[cardIndex++] = card;
 				}
 			}
 
+			// Make the tableau
 			_depotTopCards = new Card[NUM_DEPOTS];
-
 			Deal();
 		}
 

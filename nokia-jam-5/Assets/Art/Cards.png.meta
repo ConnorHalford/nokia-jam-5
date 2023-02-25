@@ -160,10 +160,10 @@ TextureImporter:
     second: Clubs_13
   - first:
       213: -5918381840280175526
-    second: Back
+    second: _Back
   - first:
       213: -4423995419813799855
-    second: Spades_Blank
+    second: _Empty
   - first:
       213: 504965767641513020
     second: Hearts_Blank
@@ -240,7 +240,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 6
+  spritePixelsToUnits: 1
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 0
   alphaUsage: 1
@@ -1374,7 +1374,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Back
+      name: _Back
       rect:
         serializedVersion: 2
         x: 0
@@ -1395,7 +1395,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spades_Blank
+      name: _Empty
       rect:
         serializedVersion: 2
         x: 12
@@ -1411,69 +1411,6 @@ TextureImporter:
       bones: []
       spriteID: 1581b02ea9fca92c0800000000000000
       internalID: -4423995419813799855
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Hearts_Blank
-      rect:
-        serializedVersion: 2
-        x: 24
-        y: 1
-        width: 11
-        height: 15
-      alignment: 1
-      pivot: {x: 0, y: 1}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: c3c3104b0bff10700800000000000000
-      internalID: 504965767641513020
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Diamonds_Blank
-      rect:
-        serializedVersion: 2
-        x: 36
-        y: 1
-        width: 11
-        height: 15
-      alignment: 1
-      pivot: {x: 0, y: 1}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 41062ffd2094bf430800000000000000
-      internalID: 3817725385822593044
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clubs_Blank
-      rect:
-        serializedVersion: 2
-        x: 48
-        y: 1
-        width: 11
-        height: 15
-      alignment: 1
-      pivot: {x: 0, y: 1}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: a1945e5108d96afe0800000000000000
-      internalID: -1178081079062083302
       vertices: []
       indices: 
       edges: []
