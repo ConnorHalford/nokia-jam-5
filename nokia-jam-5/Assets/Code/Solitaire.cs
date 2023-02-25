@@ -13,19 +13,24 @@ namespace Solitaire
 		[SerializeField] private Transform _cardParent = null;
 		[SerializeField] private SpriteRenderer[] _emptyMarkers = null;
 		[SerializeField] private SpriteRenderer _pointer = null;
+		[SerializeField] private Sprite _pointerSpriteNormal = null;
+		[SerializeField] private Sprite _pointerSpriteSelected = null;
 
 		private Inputs _input = null;
 
+		// Don't forget to reset state in Deal
 		private Card[] _deck = null;
 		private List<Card> _stock = null;
 		private int _stockIndex = -1;
 		private Card[] _depotTopmost = null;
 
+		// Don't forget to reset state in Deal
 		private Location _pointerLocation = DEFAULT_LOCATION;
 		private Vector3 _pointerPosition = Vector3.zero;
 		private bool _pointerRetracted = false;
 		private float _timePointerAlternated = -1.0f;
 		private Card _pointerCard = null;
+		private Card _pointerSelection = null;
 
 		private const int NUM_CARDS_IN_DECK = 52;
 		private const Location DEFAULT_LOCATION = Location.Depot4;
@@ -80,6 +85,7 @@ namespace Solitaire
 			bool down = _input.Game.Down.WasPerformedThisFrame();
 			if (right)
 			{
+				// Move pointer rightwards to next valid target
 				if (IsStock(_pointerLocation))
 				{
 					PointTo(Location.Waste1);
@@ -95,6 +101,7 @@ namespace Solitaire
 			}
 			else if (left)
 			{
+				// Move pointer leftwards to next valid target
 				if (IsWaste(_pointerLocation))
 				{
 					PointTo(Location.Stock);
@@ -110,14 +117,18 @@ namespace Solitaire
 			}
 			else if (up)
 			{
+				// Move pointer upwards to next valid target
 				if (IsDepot(_pointerLocation))
 				{
+					// Move up to earlier card in stack that can be moved
 					bool handled = false;
 					if (_pointerCard != null && _pointerCard.CardBehindThis != null && _pointerCard.CardBehindThis.CanBeMoved())
 					{
 						PointTo(_pointerCard.CardBehindThis);
 						handled = true;
 					}
+
+					// Move up to stock/waste/foundation
 					if (!handled)
 					{
 						switch (_pointerLocation)
@@ -135,25 +146,30 @@ namespace Solitaire
 			}
 			else if (down)
 			{
-				if (IsStock(_pointerLocation))
+				// Move pointer downwards to next valid target
+				if (IsDepot(_pointerLocation))
 				{
-					PointTo(Location.Depot1);
+					// Move down to later card in stack that can be moved
+					if (_pointerCard != null && _pointerCard.CardInFrontOfThis != null)
+					{
+						PointTo(_pointerCard.CardInFrontOfThis);
+					}
 				}
-				else if (IsWaste(_pointerLocation))
+				else
 				{
-					PointTo(Location.Depot2);
-				}
-				else if (IsFoundation(_pointerLocation))
-				{
+					// Move down to earliest card in stack that can be moved, or vacant depot
 					Location target = Location.Depot4;
 					switch (_pointerLocation)
 					{
+						case Location.Stock:		target = Location.Depot1;	break;
+						case Location.Waste1:
+						case Location.Waste2:
+						case Location.Waste3:		target = Location.Depot2;	break;
 						case Location.Foundation1:	target = Location.Depot4;	break;
 						case Location.Foundation2:	target = Location.Depot5;	break;
 						case Location.Foundation3:	target = Location.Depot6;	break;
 						case Location.Foundation4:	target = Location.Depot7;	break;
 					}
-					// Find the bottommost card in that depot that can be moved
 					Card card = GetTopmostCard(target);
 					if (card == null)
 					{
@@ -168,19 +184,63 @@ namespace Solitaire
 						PointTo(card);
 					}
 				}
-				else	// Depot
-				{
-					if (_pointerCard != null && _pointerCard.CardInFrontOfThis != null)
-					{
-						PointTo(_pointerCard.CardInFrontOfThis);
-					}
-				}
 			}
 
 			// Action inputs
 			bool select = _input.Game.Select.WasPerformedThisFrame();
 			bool back = _input.Game.Back.WasPerformedThisFrame();
 			bool draw = _input.Game.Draw.WasPerformedThisFrame();
+			if (select)
+			{
+				if (_pointerSelection == null)
+				{
+					// Pick up card
+					if (_pointerCard != null)
+					{
+						SetPointerSelection(_pointerCard);
+					}
+				}
+				else
+				{
+					// Move and drop card
+					if (_pointerSelection.CanBeMovedTo(_pointerCard))
+					{
+						// Reveal new topmost depot card
+						if (IsDepot(_pointerSelection.Location))
+						{
+							Card newTopmost = null;
+							if (_pointerSelection.CardBehindThis != null)
+							{
+								_pointerSelection.CardBehindThis.SetFaceUp(true);
+								newTopmost = _pointerSelection.CardBehindThis;
+							}
+							int index = DepotIndex(_pointerSelection.Location);
+							_depotTopmost[index] = newTopmost;
+						}
+
+						// Move held card
+						SetCardLocation(_pointerSelection, _pointerCard.Location);
+					}
+					// Drop held card
+					SetPointerSelection(null);
+				}
+			}
+			else if (back)
+			{
+				// Drop card
+				if (_pointerSelection != null)
+				{
+					SetPointerSelection(null);
+				}
+			}
+
+#if UNITY_EDITOR
+			// Re-deal
+			if (_input.Game.DebugRedeal.WasPerformedThisFrame())
+			{
+				Deal();
+			}
+#endif	// UNITY_EDITOR
 
 			// Pointer animation
 			float time = Time.unscaledTime;
@@ -235,6 +295,7 @@ namespace Solitaire
 			}
 			_pointerLocation = DEFAULT_LOCATION;
 			_pointerCard = null;
+			SetPointerSelection(null);
 
 			// Fisher-Yates in-place shuffle
 			for (int i = 0; i <= NUM_CARDS_IN_DECK - 2; ++i)
@@ -367,6 +428,12 @@ namespace Solitaire
 		{
 			bool leftEdge = (location == Location.Stock || location == Location.Depot1);
 			return !leftEdge;
+		}
+
+		private void SetPointerSelection(Card card)
+		{
+			_pointerSelection = card;
+			_pointer.sprite = (_pointerSelection == null) ? _pointerSpriteNormal : _pointerSpriteSelected;
 		}
 	}
 }

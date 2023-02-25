@@ -10,7 +10,7 @@ GAME TODO:
 + Card art and rendering
 + Deck shuffling
 + Dealing and revealing the tableau
-- Card stacking and movement
++ Card stacking and movement
 - Moving into empty tableau places
 - Vertical camera scrolling
 - Drawing cards from the stock

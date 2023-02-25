@@ -600,6 +600,10 @@ MonoBehaviour:
   - {fileID: 493559072}
   - {fileID: 752322422}
   _pointer: {fileID: 1704679809}
+  _pointerSpriteNormal: {fileID: 504965767641513020, guid: 2e863dc05b191bb4ebfcd025f3ce7840,
+    type: 3}
+  _pointerSpriteSelected: {fileID: 3817725385822593044, guid: 2e863dc05b191bb4ebfcd025f3ce7840,
+    type: 3}
 --- !u!4 &570995671
 Transform:
   m_ObjectHideFlags: 0

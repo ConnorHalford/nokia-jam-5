@@ -91,6 +91,15 @@ namespace Solitaire
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DebugRedeal"",
+                    ""type"": ""Button"",
+                    ""id"": ""bb6a4de4-ec1e-41fd-b671-f82dfbf29e17"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -368,6 +377,17 @@ namespace Solitaire
                     ""action"": ""Draw"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5c2503c9-1b15-4629-8e63-14245805f983"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DebugRedeal"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -383,6 +403,7 @@ namespace Solitaire
             m_Game_Select = m_Game.FindAction("Select", throwIfNotFound: true);
             m_Game_Back = m_Game.FindAction("Back", throwIfNotFound: true);
             m_Game_Draw = m_Game.FindAction("Draw", throwIfNotFound: true);
+            m_Game_DebugRedeal = m_Game.FindAction("DebugRedeal", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -449,6 +470,7 @@ namespace Solitaire
         private readonly InputAction m_Game_Select;
         private readonly InputAction m_Game_Back;
         private readonly InputAction m_Game_Draw;
+        private readonly InputAction m_Game_DebugRedeal;
         public struct GameActions
         {
             private @Inputs m_Wrapper;
@@ -460,6 +482,7 @@ namespace Solitaire
             public InputAction @Select => m_Wrapper.m_Game_Select;
             public InputAction @Back => m_Wrapper.m_Game_Back;
             public InputAction @Draw => m_Wrapper.m_Game_Draw;
+            public InputAction @DebugRedeal => m_Wrapper.m_Game_DebugRedeal;
             public InputActionMap Get() { return m_Wrapper.m_Game; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -490,6 +513,9 @@ namespace Solitaire
                     @Draw.started -= m_Wrapper.m_GameActionsCallbackInterface.OnDraw;
                     @Draw.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnDraw;
                     @Draw.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnDraw;
+                    @DebugRedeal.started -= m_Wrapper.m_GameActionsCallbackInterface.OnDebugRedeal;
+                    @DebugRedeal.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnDebugRedeal;
+                    @DebugRedeal.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnDebugRedeal;
                 }
                 m_Wrapper.m_GameActionsCallbackInterface = instance;
                 if (instance != null)
@@ -515,6 +541,9 @@ namespace Solitaire
                     @Draw.started += instance.OnDraw;
                     @Draw.performed += instance.OnDraw;
                     @Draw.canceled += instance.OnDraw;
+                    @DebugRedeal.started += instance.OnDebugRedeal;
+                    @DebugRedeal.performed += instance.OnDebugRedeal;
+                    @DebugRedeal.canceled += instance.OnDebugRedeal;
                 }
             }
         }
@@ -528,6 +557,7 @@ namespace Solitaire
             void OnSelect(InputAction.CallbackContext context);
             void OnBack(InputAction.CallbackContext context);
             void OnDraw(InputAction.CallbackContext context);
+            void OnDebugRedeal(InputAction.CallbackContext context);
         }
     }
 }

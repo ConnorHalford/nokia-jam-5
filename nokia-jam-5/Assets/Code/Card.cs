@@ -26,6 +26,7 @@ namespace Solitaire
 		[SerializeField] private int _value = 1;
 		[SerializeField] private bool _faceUp = true;
 
+		// Don't forget to reset state in Init
 		private Solitaire _solitaire = null;
 		private SpriteRenderer _sprite = null;
 		private Location _location = Location.Stock;
@@ -74,6 +75,13 @@ namespace Solitaire
 
 		public void SetLocation(Location location, Card currentTopmost)
 		{
+			// Clear previous connection
+			if (_cardBehindThis != null)
+			{
+				_cardBehindThis._cardInFrontOfThis = null;
+				_cardBehindThis = null;
+			}
+
 			// Move to location
 			_location = location;
 			_cardBehindThis = currentTopmost;
