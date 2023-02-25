@@ -44,9 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9100fa64aa7108f49a694025c69d71cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _backSprite: {fileID: -5918381840280175526, guid: 2e863dc05b191bb4ebfcd025f3ce7840,
+    type: 3}
   _cardSprites:
-  - {fileID: -5918381840280175526, guid: 2e863dc05b191bb4ebfcd025f3ce7840, type: 3}
-  - {fileID: -4423995419813799855, guid: 2e863dc05b191bb4ebfcd025f3ce7840, type: 3}
   - {fileID: 9188333498531739174, guid: 2e863dc05b191bb4ebfcd025f3ce7840, type: 3}
   - {fileID: 3378298235695921167, guid: 2e863dc05b191bb4ebfcd025f3ce7840, type: 3}
   - {fileID: 1868799596187022845, guid: 2e863dc05b191bb4ebfcd025f3ce7840, type: 3}

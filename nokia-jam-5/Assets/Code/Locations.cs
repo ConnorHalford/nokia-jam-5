@@ -50,6 +50,32 @@ namespace Solitaire
 
 		public static readonly Vector3 CARD_X_OFFSET = new Vector3(5, 0, 0);	// Waste
 		public static readonly Vector3 CARD_Y_OFFSET = new Vector3(0, -5, 0);	// Depots
+		public static readonly Vector3 POINTER_OFFSET_FACING_RIGHTWARDS = new Vector3(-4, 0, 0);
+		public static readonly Vector3 POINTER_OFFSET_FACING_LEFTWARDS = new Vector3(15, 0, 0);
+
+		public static Vector3 LocationBasePosition(Location location)
+		{
+			Vector3 position = Vector3.zero;
+			switch (location)
+			{
+				case Location.Stock:		position = POS_STOCK;			break;
+				case Location.Waste1:		position = POS_WASTE1;			break;
+				case Location.Waste2:		position = POS_WASTE2;			break;
+				case Location.Waste3:		position = POS_WASTE3;			break;
+				case Location.Foundation1:	position = POS_FOUNDATION1;		break;
+				case Location.Foundation2:	position = POS_FOUNDATION2;		break;
+				case Location.Foundation3:	position = POS_FOUNDATION3;		break;
+				case Location.Foundation4:	position = POS_FOUNDATION4;		break;
+				case Location.Depot1:		position = POS_DEPOT1;			break;
+				case Location.Depot2:		position = POS_DEPOT2;			break;
+				case Location.Depot3:		position = POS_DEPOT3;			break;
+				case Location.Depot4:		position = POS_DEPOT4;			break;
+				case Location.Depot5:		position = POS_DEPOT5;			break;
+				case Location.Depot6:		position = POS_DEPOT6;			break;
+				case Location.Depot7:		position = POS_DEPOT7;			break;
+			}
+			return position;
+		}
 
 		public static bool IsStock(Location location)
 		{

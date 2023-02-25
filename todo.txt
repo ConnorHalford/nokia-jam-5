@@ -25,6 +25,7 @@ GAME TODO:
 	- Allowed to take cards back from foundations
 	- Tableau cards start face down or face up
 	- Stacking requires alternating colors
+- Held inputs
 - Animate drawing
 - Animate dealing
 - Animate moving stacks

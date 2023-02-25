@@ -166,7 +166,7 @@ TextureImporter:
     second: _Empty
   - first:
       213: 504965767641513020
-    second: Hearts_Blank
+    second: _Pointer
   - first:
       213: 3817725385822593044
     second: Diamonds_Blank
@@ -1411,6 +1411,27 @@ TextureImporter:
       bones: []
       spriteID: 1581b02ea9fca92c0800000000000000
       internalID: -4423995419813799855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: _Pointer
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 9
+        width: 5
+        height: 7
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c3c3104b0bff10700800000000000000
+      internalID: 504965767641513020
       vertices: []
       indices: 
       edges: []

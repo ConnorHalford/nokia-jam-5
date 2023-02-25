@@ -12,17 +12,32 @@ namespace Solitaire
 		Spades = 3
 	}
 
+	public enum SuitColor
+	{
+		Black,
+		Red
+	}
+
 	public class Card : MonoBehaviour
 	{
+		[SerializeField] private Sprite _backSprite = null;
 		[SerializeField] private Sprite[] _cardSprites = null;
 		[SerializeField] private Suit _suit = Suit.Spades;
 		[SerializeField] private int _value = 1;
 		[SerializeField] private bool _faceUp = true;
 
+		private Solitaire _solitaire = null;
 		private SpriteRenderer _sprite = null;
 		private Location _location = Location.Stock;
-		private Card _cardBelowThis = null;
-		private Card _cardAboveThis = null;
+		private Card _cardBehindThis = null;
+		private Card _cardInFrontOfThis = null;
+
+		public Suit Suit				{ get { return _suit; } }
+		public int Value				{ get { return _value; } }
+		public bool IsFaceUp			{ get { return _faceUp; } }
+		public Location Location		{ get { return _location; } }
+		public Card CardBehindThis		{ get { return _cardBehindThis; } }
+		public Card CardInFrontOfThis	{ get { return _cardInFrontOfThis; } }
 
 		public int RenderOrder	// Higher number is in front
 		{
@@ -30,12 +45,20 @@ namespace Solitaire
 			set { _sprite.sortingOrder = value; }
 		}
 
-		public void Init(Suit suit, int value)
+		public SuitColor SuitColor
 		{
+			get { return (_suit == Suit.Spades || _suit == Suit.Clubs) ? SuitColor.Black : SuitColor.Red; }
+		}
+
+		public void Init(Solitaire solitaire, Suit suit, int value)
+		{
+			_solitaire = solitaire;
 			_suit = suit;
 			_value = value;
 			_faceUp = false;
 			_location = Location.Stock;
+			_cardBehindThis = null;
+			_cardInFrontOfThis = null;
 			UpdateArt();
 			RenderOrder = 0;
 		}
@@ -49,48 +72,116 @@ namespace Solitaire
 			}
 		}
 
-		public void SetLocation(Location location, Card cardBelow)
+		public void SetLocation(Location location, Card currentTopmost)
 		{
+			// Move to location
 			_location = location;
-			_cardBelowThis = cardBelow;
-			if (_cardBelowThis != null)
+			_cardBehindThis = currentTopmost;
+			if (_cardBehindThis != null)
 			{
-				_cardBelowThis._cardAboveThis = this;
-				RenderOrder = _cardBelowThis.RenderOrder + 1;
-				transform.position = _cardBelowThis.transform.position + CARD_Y_OFFSET;
+				_cardBehindThis._cardInFrontOfThis = this;
+				RenderOrder = _cardBehindThis.RenderOrder + 1;
+				transform.position = _cardBehindThis.transform.position + CARD_Y_OFFSET;
 			}
 			else	// Vacant space
 			{
 				RenderOrder = 0;
-				switch (_location)
-				{
-					case Location.Stock:		transform.position = POS_STOCK;			break;
-					case Location.Waste1:		transform.position = POS_WASTE1;		break;
-					case Location.Waste2:		transform.position = POS_WASTE2;		break;
-					case Location.Waste3:		transform.position = POS_WASTE3;		break;
-					case Location.Foundation1:	transform.position = POS_FOUNDATION1;	break;
-					case Location.Foundation2:	transform.position = POS_FOUNDATION2;	break;
-					case Location.Foundation3:	transform.position = POS_FOUNDATION3;	break;
-					case Location.Foundation4:	transform.position = POS_FOUNDATION4;	break;
-					case Location.Depot1:		transform.position = POS_DEPOT1;		break;
-					case Location.Depot2:		transform.position = POS_DEPOT2;		break;
-					case Location.Depot3:		transform.position = POS_DEPOT3;		break;
-					case Location.Depot4:		transform.position = POS_DEPOT4;		break;
-					case Location.Depot5:		transform.position = POS_DEPOT5;		break;
-					case Location.Depot6:		transform.position = POS_DEPOT6;		break;
-					case Location.Depot7:		transform.position = POS_DEPOT7;		break;
-				}
+				transform.position = LocationBasePosition(_location);
+			}
+
+			// Move cards in front of this
+			Card next = _cardInFrontOfThis;
+			Vector3 position = transform.position;
+			while (next != null)
+			{
+				position += CARD_Y_OFFSET;
+				next._location = _location;
+				next.transform.position = position;
+				next = next._cardInFrontOfThis;
 			}
 		}
 
 		public Card GetTopmost()
 		{
 			Card topmost = this;
-			while (topmost._cardAboveThis != null)
+			while (topmost._cardInFrontOfThis != null)
 			{
-				topmost = topmost._cardAboveThis;
+				topmost = topmost._cardInFrontOfThis;
 			}
 			return topmost;
+		}
+
+		public bool CanBeMoved()
+		{
+			bool canBeMoved = false;
+			if (InDepot())
+			{
+				if (_faceUp)
+				{
+					// Can be moved if all cards in front of it are alternating colors and descending value
+					Card current = this;
+					Card next = _cardInFrontOfThis;
+					canBeMoved = true;
+					while (next != null)
+					{
+						if (next.SuitColor == current.SuitColor || next.Value != current.Value - 1)
+						{
+							canBeMoved = false;
+							break;
+						}
+						current = next;
+						next = current._cardInFrontOfThis;
+					}
+				}
+			}
+			else
+			{
+				Card topmost = _solitaire.GetTopmostCard(_location);
+				canBeMoved = (this == topmost);
+			}
+			return canBeMoved;
+		}
+
+		// Assumes that CanBeMoved is true, that should be checked first
+		public bool CanBeMovedTo(Location location)
+		{
+			if (IsDepot(location))
+			{
+				Card topmost = _solitaire.GetTopmostCard(location);
+				if (topmost == null)
+				{
+					// Only Kings can be placed in vacant depots
+					return _value == 13;
+				}
+				return CanBeMovedTo(topmost);
+			}
+			if (IsFoundation(location))
+			{
+				Card topmost = _solitaire.GetTopmostCard(location);
+				if (topmost == null)
+				{
+					// Only Aces can be placed in vacant foundations
+					return _value == 1;
+				}
+				return CanBeMovedTo(topmost);
+			}
+			return false;
+		}
+
+		// Assumes that CanBeMoved is true, that should be checked first
+		public bool CanBeMovedTo(Card other)
+		{
+			if (other.InDepot())
+			{
+				// Alternating colors and descending value (can move stacks)
+				return other.SuitColor != this.SuitColor && other.Value == this.Value + 1;
+			}
+			if (other.InFoundation())
+			{
+				// Matching suit and ascending value (only 1 card at a time)
+				return other.Suit == this.Suit && other.Value == this.Value - 1 && _cardInFrontOfThis == null;
+			}
+			return false;
 		}
 
 		private bool InStock()
@@ -121,15 +212,17 @@ namespace Solitaire
 			}
 			// The sprites array is filled from the multi-sprite texture, which orders sub-sprites alphabetically.
 			// Therefore the Suit enum is also alphabetical to allow simple indexing with the following order:
-			// _Back, _Empty, Clubs 1-13, Diamonds 1-13, Hearts 1-13, Spades 1-13
-			int index = 0;
+			// Clubs 1-13, Diamonds 1-13, Hearts 1-13, Spades 1-13
 			if (_faceUp)
 			{
-				const int OFFSET = 2;	// _Back, _Empty
 				const int SPRITES_PER_SUIT = 13;
-				index = OFFSET + (_value - 1) + ((int)_suit * SPRITES_PER_SUIT);
+				int index = (_value - 1) + ((int)_suit * SPRITES_PER_SUIT);
+				_sprite.sprite = _cardSprites[index];
 			}
-			_sprite.sprite = _cardSprites[index];
+			else
+			{
+				_sprite.sprite = _backSprite;
+			}
 
 #if UNITY_EDITOR
 			// Give the GameObject a nice name in the hierarchy
