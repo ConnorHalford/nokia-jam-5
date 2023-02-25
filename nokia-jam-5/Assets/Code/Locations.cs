@@ -48,8 +48,13 @@ namespace Solitaire
 		public static readonly Vector3[] POS_DEPOT = new Vector3[] { POS_DEPOT1, POS_DEPOT2, POS_DEPOT3, POS_DEPOT4, POS_DEPOT5, POS_DEPOT6, POS_DEPOT7 };
 		public const int NUM_DEPOTS = 7;
 
+		public const int SCREEN_WIDTH = 84;
+		public const int SCREEN_HEIGHT = 48;
+		public const int CARD_WIDTH = 11;
+		public const int CARD_HEIGHT = 15;
 		public static readonly Vector3 CARD_X_OFFSET = new Vector3(5, 0, 0);	// Waste
 		public static readonly Vector3 CARD_Y_OFFSET = new Vector3(0, -5, 0);	// Depots
+
 		public static readonly Vector3 POINTER_OFFSET_FACING_RIGHTWARDS = new Vector3(-4, 0, 0);
 		public static readonly Vector3 POINTER_OFFSET_FACING_LEFTWARDS = new Vector3(15, 0, 0);
 

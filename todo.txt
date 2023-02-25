@@ -12,7 +12,7 @@ GAME TODO:
 + Dealing and revealing the tableau
 + Card stacking and movement
 - Moving into empty tableau places
-- Vertical camera scrolling
++ Vertical camera scrolling
 - Drawing cards from the stock
 - Passing through the stock multiple times
 - Building on the foundations

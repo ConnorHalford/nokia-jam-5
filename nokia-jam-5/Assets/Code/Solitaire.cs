@@ -15,6 +15,7 @@ namespace Solitaire
 		[SerializeField] private SpriteRenderer _pointer = null;
 		[SerializeField] private Sprite _pointerSpriteNormal = null;
 		[SerializeField] private Sprite _pointerSpriteSelected = null;
+		[SerializeField] private Transform _camera = null;
 
 		private Inputs _input = null;
 
@@ -203,7 +204,7 @@ namespace Solitaire
 				else
 				{
 					// Move and drop card
-					if (_pointerSelection.CanBeMovedTo(_pointerCard))
+					if (_pointerSelection.CanBeMovedTo(_pointerLocation))
 					{
 						// Reveal new topmost depot card
 						if (IsDepot(_pointerSelection.Location))
@@ -219,7 +220,7 @@ namespace Solitaire
 						}
 
 						// Move held card
-						SetCardLocation(_pointerSelection, _pointerCard.Location);
+						SetCardLocation(_pointerSelection, _pointerLocation);
 					}
 					// Drop held card
 					SetPointerSelection(null);
@@ -381,6 +382,7 @@ namespace Solitaire
 				PointTo(topmost);
 				return;
 			}
+			_pointerCard = null;
 			bool pointRightwards = ShouldPointRightwards(location);
 			Vector3 position = LocationBasePosition(location);
 			PointTo(position, pointRightwards);
@@ -396,9 +398,20 @@ namespace Solitaire
 
 		private void PointTo(Vector3 position, bool pointRightwards)
 		{
+			// Configure pointer
 			_pointer.flipX = !pointRightwards;
 			_pointerPosition = position;
 			UpdatePointerPosition();
+
+			// Scroll camera to frame selection
+			const int HALF_SCREEN_HEIGHT = SCREEN_HEIGHT / 2;
+			bool aboveViewport = _pointerPosition.y > _camera.position.y + HALF_SCREEN_HEIGHT;
+			bool belowViewport = _pointerPosition.y - CARD_HEIGHT < _camera.position.y - HALF_SCREEN_HEIGHT;
+			if (aboveViewport || belowViewport)
+			{
+				float y = Mathf.Min(0.0f, _pointerPosition.y + HALF_SCREEN_HEIGHT - CARD_HEIGHT);
+				_camera.position = new Vector3(_camera.position.x, y, _camera.position.z);
+			}
 		}
 
 		private void UpdatePointerPosition()

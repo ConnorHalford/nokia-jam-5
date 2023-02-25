@@ -604,6 +604,7 @@ MonoBehaviour:
     type: 3}
   _pointerSpriteSelected: {fileID: 3817725385822593044, guid: 2e863dc05b191bb4ebfcd025f3ce7840,
     type: 3}
+  _camera: {fileID: 519420032}
 --- !u!4 &570995671
 Transform:
   m_ObjectHideFlags: 0
