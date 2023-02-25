@@ -89,7 +89,15 @@ namespace Solitaire
 			{
 				_cardBehindThis._cardInFrontOfThis = this;
 				RenderOrder = _cardBehindThis.RenderOrder + 1;
-				transform.position = _cardBehindThis.transform.position + CARD_Y_OFFSET;
+				transform.position = _cardBehindThis.transform.position;
+				if (IsDepot(location))
+				{
+					transform.position += CARD_Y_OFFSET;
+				}
+				else if (IsWaste(location))
+				{
+					transform.position += CARD_X_OFFSET;
+				}
 			}
 			else	// Vacant space
 			{

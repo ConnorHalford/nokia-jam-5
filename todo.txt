@@ -11,12 +11,12 @@ GAME TODO:
 + Deck shuffling
 + Dealing and revealing the tableau
 + Card stacking and movement
-- Moving into empty tableau places
++ Moving into empty tableau places
 + Vertical camera scrolling
 - Drawing cards from the stock
 - Passing through the stock multiple times
-- Building on the foundations
-- Taking back from the foundations
++ Building on the foundations
++ Taking back from the foundations
 - Winning the game
 - Reshuffle and restart
 - Difficulty options
@@ -26,6 +26,7 @@ GAME TODO:
 	- Tableau cards start face down or face up
 	- Stacking requires alternating colors
 - Held inputs
+- Wrap navigation
 - Animate drawing
 - Animate dealing
 - Animate moving stacks

@@ -24,6 +24,9 @@ namespace Solitaire
 		private List<Card> _stock = null;
 		private int _stockIndex = -1;
 		private Card[] _depotTopmost = null;
+		private Card[] _foundationTopmost = null;
+		// TODO: waste topmost
+		// TODO: stock topmost
 
 		// Don't forget to reset state in Deal
 		private Location _pointerLocation = DEFAULT_LOCATION;
@@ -70,6 +73,7 @@ namespace Solitaire
 
 			// Make the tableau
 			_depotTopmost = new Card[NUM_DEPOTS];
+			_foundationTopmost = new Card[NUM_FOUNDATIONS];
 			Deal();
 
 			// Enable input
@@ -206,7 +210,7 @@ namespace Solitaire
 					// Move and drop card
 					if (_pointerSelection.CanBeMovedTo(_pointerLocation))
 					{
-						// Reveal new topmost depot card
+						// Track/reveal new topmost depot card
 						if (IsDepot(_pointerSelection.Location))
 						{
 							Card newTopmost = null;
@@ -218,9 +222,27 @@ namespace Solitaire
 							int index = DepotIndex(_pointerSelection.Location);
 							_depotTopmost[index] = newTopmost;
 						}
+						// Track new topmost foundation card
+						else if (IsFoundation(_pointerSelection.Location))
+						{
+							Card newTopmost = null;
+							if (_pointerSelection.CardBehindThis != null)
+							{
+								newTopmost = _pointerSelection.CardBehindThis;
+							}
+							int index = FoundationIndex(_pointerSelection.Location);
+							_foundationTopmost[index] = newTopmost;
+						}
+						// TODO: track new topmost waste card
 
 						// Move held card
 						SetCardLocation(_pointerSelection, _pointerLocation);
+
+						// Point to new topmost foundation
+						if (IsFoundation(_pointerLocation))
+						{
+							PointTo(_pointerSelection);
+						}
 					}
 					// Drop held card
 					SetPointerSelection(null);
@@ -265,6 +287,11 @@ namespace Solitaire
 				int depotIndex = DepotIndex(location);
 				topmost = _depotTopmost[depotIndex];
 			}
+			else if (IsFoundation(location))
+			{
+				int foundationIndex = FoundationIndex(location);
+				topmost = _foundationTopmost[foundationIndex];
+			}
 			else if (IsStock(location))
 			{
 				if (_stock.Count > 0)
@@ -272,6 +299,8 @@ namespace Solitaire
 					topmost = _stock[_stockIndex];
 				}
 			}
+			// TODO: GetTopmostCard waste
+			// TODO: GetTopmostCard stock
 			return topmost;
 		}
 
@@ -292,6 +321,13 @@ namespace Solitaire
 				for (int i = 0; i < NUM_DEPOTS; ++i)
 				{
 					_depotTopmost[i] = null;
+				}
+			}
+			if (_foundationTopmost != null)
+			{
+				for (int i = 0; i < NUM_FOUNDATIONS; ++i)
+				{
+					_foundationTopmost[i] = null;
 				}
 			}
 			_pointerLocation = DEFAULT_LOCATION;
@@ -351,11 +387,17 @@ namespace Solitaire
 			// Work out what card this card will be in front of, if any
 			Card topmost = null;
 			bool inDepot = IsDepot(location);
-			int depotIndex = -1;
+			bool inFoundation = IsFoundation(location);
+			int index = -1;
 			if (inDepot)
 			{
-				depotIndex = DepotIndex(location);
-				topmost = _depotTopmost[depotIndex];
+				index = DepotIndex(location);
+				topmost = _depotTopmost[index];
+			}
+			else if (inFoundation)
+			{
+				index = FoundationIndex(location);
+				topmost = _foundationTopmost[index];
 			}
 
 #if UNITY_EDITOR
@@ -369,7 +411,11 @@ namespace Solitaire
 			if (inDepot)
 			{
 				topmost = card.GetTopmost();
-				_depotTopmost[depotIndex] = topmost;
+				_depotTopmost[index] = topmost;
+			}
+			else if (inFoundation)
+			{
+				_foundationTopmost[index] = card;
 			}
 		}
 
