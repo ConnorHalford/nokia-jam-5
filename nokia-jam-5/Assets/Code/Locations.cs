@@ -23,28 +23,28 @@ namespace Solitaire
 
 	public static class Locations
 	{
-		public static readonly Vector3 POS_STOCK = new Vector3(-42, 24, 0);
+		public static readonly Vector3 POS_STOCK = new Vector3(-42, 23, 0);
 
-		public static readonly Vector3 POS_WASTE1 = new Vector3(-30, 24, 0);
-		public static readonly Vector3 POS_WASTE2 = new Vector3(-25, 24, 0);
-		public static readonly Vector3 POS_WASTE3 = new Vector3(-20, 24, 0);
+		public static readonly Vector3 POS_WASTE1 = new Vector3(-30, 23, 0);
+		public static readonly Vector3 POS_WASTE2 = new Vector3(-25, 23, 0);
+		public static readonly Vector3 POS_WASTE3 = new Vector3(-20, 23, 0);
 		public static readonly Vector3[] POS_WASTE = new Vector3[] { POS_WASTE1, POS_WASTE2, POS_WASTE3 };
 		public const int NUM_WASTES = 3;
 
-		public static readonly Vector3 POS_FOUNDATION1 = new Vector3(-6, 24, 0);
-		public static readonly Vector3 POS_FOUNDATION2 = new Vector3(6, 24, 0);
-		public static readonly Vector3 POS_FOUNDATION3 = new Vector3(18, 24, 0);
-		public static readonly Vector3 POS_FOUNDATION4 = new Vector3(30, 24, 0);
+		public static readonly Vector3 POS_FOUNDATION1 = new Vector3(-6, 23, 0);
+		public static readonly Vector3 POS_FOUNDATION2 = new Vector3(6, 23, 0);
+		public static readonly Vector3 POS_FOUNDATION3 = new Vector3(18, 23, 0);
+		public static readonly Vector3 POS_FOUNDATION4 = new Vector3(30, 23, 0);
 		public static readonly Vector3[] POS_FOUNDATION = new Vector3[] { POS_FOUNDATION1, POS_FOUNDATION2, POS_FOUNDATION3, POS_FOUNDATION4 };
 		public const int NUM_FOUNDATIONS = 4;
 
-		public static readonly Vector3 POS_DEPOT1 = new Vector3(-42, 8, 0);
-		public static readonly Vector3 POS_DEPOT2 = new Vector3(-30, 8, 0);
-		public static readonly Vector3 POS_DEPOT3 = new Vector3(-18, 8, 0);
-		public static readonly Vector3 POS_DEPOT4 = new Vector3(-6, 8, 0);
-		public static readonly Vector3 POS_DEPOT5 = new Vector3(6, 8, 0);
-		public static readonly Vector3 POS_DEPOT6 = new Vector3(18, 8, 0);
-		public static readonly Vector3 POS_DEPOT7 = new Vector3(30, 8, 0);
+		public static readonly Vector3 POS_DEPOT1 = new Vector3(-42, 6, 0);
+		public static readonly Vector3 POS_DEPOT2 = new Vector3(-30, 6, 0);
+		public static readonly Vector3 POS_DEPOT3 = new Vector3(-18, 6, 0);
+		public static readonly Vector3 POS_DEPOT4 = new Vector3(-6, 6, 0);
+		public static readonly Vector3 POS_DEPOT5 = new Vector3(6, 6, 0);
+		public static readonly Vector3 POS_DEPOT6 = new Vector3(18, 6, 0);
+		public static readonly Vector3 POS_DEPOT7 = new Vector3(30, 6, 0);
 		public static readonly Vector3[] POS_DEPOT = new Vector3[] { POS_DEPOT1, POS_DEPOT2, POS_DEPOT3, POS_DEPOT4, POS_DEPOT5, POS_DEPOT6, POS_DEPOT7 };
 		public const int NUM_DEPOTS = 7;
 
