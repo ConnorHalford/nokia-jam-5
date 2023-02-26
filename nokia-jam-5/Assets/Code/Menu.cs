@@ -75,6 +75,7 @@ namespace Solitaire
 				if (select || back)
 				{
 					SetState(MenuState.Closed);
+					_solitaire.Deal();
 				}
 			}
 			else if (_state == MenuState.Win)
@@ -82,7 +83,6 @@ namespace Solitaire
 				if (select || back)
 				{
 					SetState(MenuState.Title);
-					_solitaire.Deal();
 				}
 			}
 			else if (_state == MenuState.Options)

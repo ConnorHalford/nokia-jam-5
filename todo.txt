@@ -26,7 +26,7 @@ GAME TODO:
 	+ Tableau cards start face down or face up
 	+ Stacking requires alternating colors
 + Wrap navigation
-- Title screen
++ Title screen
 - Auto-finish when all cards stacked
 - Held inputs
 - Animate drawing
