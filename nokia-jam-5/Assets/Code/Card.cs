@@ -108,10 +108,12 @@ namespace Solitaire
 			// Move cards in front of this
 			Card next = _cardInFrontOfThis;
 			Vector3 position = transform.position;
+			int renderOrder = RenderOrder + 1;
 			while (next != null)
 			{
 				position += CARD_Y_OFFSET;
 				next._location = _location;
+				next.RenderOrder = renderOrder++;
 				next.transform.position = position;
 				next = next._cardInFrontOfThis;
 			}
@@ -125,6 +127,16 @@ namespace Solitaire
 				topmost = topmost._cardInFrontOfThis;
 			}
 			return topmost;
+		}
+
+		public Card GetBottommostMovable()
+		{
+			Card bottommostMovable = this;
+			while (bottommostMovable.CardBehindThis != null && bottommostMovable.CardBehindThis.CanBeMoved())
+			{
+				bottommostMovable = bottommostMovable.CardBehindThis;
+			}
+			return bottommostMovable;
 		}
 
 		public bool CanBeMoved()

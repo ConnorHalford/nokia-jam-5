@@ -22,11 +22,9 @@ namespace Solitaire
 		// Don't forget to reset state in Deal
 		private Card[] _deck = null;
 		private List<Card> _stock = null;
-		private int _stockIndex = -1;
+		private List<Card> _waste = null;
 		private Card[] _depotTopmost = null;
 		private Card[] _foundationTopmost = null;
-		// TODO: waste topmost
-		// TODO: stock topmost
 
 		// Don't forget to reset state in Deal
 		private Location _pointerLocation = DEFAULT_LOCATION;
@@ -90,8 +88,26 @@ namespace Solitaire
 			bool down = _input.Game.Down.WasPerformedThisFrame();
 			if (right)
 			{
-				// Move pointer rightwards to next valid target
-				if (IsStock(_pointerLocation))
+				// Move pointer rightwards to next valid target, wrapping around from right to left
+				if (IsDepot(_pointerLocation))
+				{
+					Location location = Location.Depot1;
+					if (_pointerLocation != Location.Depot7)
+					{
+						location = (Location)((int)_pointerLocation + 1);
+					}
+					NavigateToDepot(location);
+				}
+				else if (IsFoundation(_pointerLocation))
+				{
+					Location location = Location.Stock;
+					if (_pointerLocation != Location.Foundation4)
+					{
+						location = (Location)((int)_pointerLocation + 1);
+					}
+					PointTo(location);
+				}
+				else if (IsStock(_pointerLocation))
 				{
 					PointTo(Location.Waste1);
 				}
@@ -99,59 +115,64 @@ namespace Solitaire
 				{
 					PointTo(Location.Foundation1);
 				}
-				else if (_pointerLocation != Location.Foundation4 && _pointerLocation != Location.Depot7)
-				{
-					PointTo((Location)((int)_pointerLocation + 1));
-				}
 			}
 			else if (left)
 			{
-				// Move pointer leftwards to next valid target
-				if (IsWaste(_pointerLocation))
+				// Move pointer leftwards to next valid target, wrapping around from left to right
+				if (IsDepot(_pointerLocation))
+				{
+					Location location = Location.Depot7;
+					if (_pointerLocation != Location.Depot1)
+					{
+						location = (Location)((int)_pointerLocation - 1);
+					}
+					NavigateToDepot(location);
+				}
+				else if (IsFoundation(_pointerLocation))
+				{
+					Location location = Location.Waste1;
+					if (_pointerLocation != Location.Foundation1)
+					{
+						location = (Location)((int)_pointerLocation - 1);
+					}
+					PointTo(location);
+				}
+				else if (IsStock(_pointerLocation))
+				{
+					PointTo(Location.Foundation4);
+				}
+				else if (IsWaste(_pointerLocation))
 				{
 					PointTo(Location.Stock);
-				}
-				else if (_pointerLocation == Location.Foundation1)
-				{
-					PointTo(Location.Waste1);
-				}
-				else if (_pointerLocation != Location.Stock && _pointerLocation != Location.Depot1)
-				{
-					PointTo((Location)((int)_pointerLocation - 1));
 				}
 			}
 			else if (up)
 			{
-				// Move pointer upwards to next valid target
+				// Move pointer upwards to next valid target, wrapping around from top to bottom
 				if (IsDepot(_pointerLocation))
 				{
 					// Move up to earlier card in stack that can be moved
-					bool handled = false;
 					if (_pointerCard != null && _pointerCard.CardBehindThis != null && _pointerCard.CardBehindThis.CanBeMoved())
 					{
 						PointTo(_pointerCard.CardBehindThis);
-						handled = true;
 					}
-
 					// Move up to stock/waste/foundation
-					if (!handled)
+					else
 					{
-						switch (_pointerLocation)
-						{
-							case Location.Depot1:	PointTo(Location.Stock);		break;
-							case Location.Depot2:	PointTo(Location.Waste1);		break;
-							case Location.Depot3:
-							case Location.Depot4:	PointTo(Location.Foundation1);	break;
-							case Location.Depot5:	PointTo(Location.Foundation2);	break;
-							case Location.Depot6:	PointTo(Location.Foundation3);	break;
-							case Location.Depot7:	PointTo(Location.Foundation4);	break;
-						}
+						Location location = GetVerticalDestination(_pointerLocation);
+						PointTo(location);
 					}
+				}
+				else
+				{
+					// Wrap around to topmost card or vacant depot
+					Location location = GetVerticalDestination(_pointerLocation);
+					PointTo(location);
 				}
 			}
 			else if (down)
 			{
-				// Move pointer downwards to next valid target
+				// Move pointer downwards to next valid target, wrapping around from bottom to top
 				if (IsDepot(_pointerLocation))
 				{
 					// Move down to later card in stack that can be moved
@@ -159,35 +180,18 @@ namespace Solitaire
 					{
 						PointTo(_pointerCard.CardInFrontOfThis);
 					}
+					// Wrap around to stock/waste/foundation
+					else
+					{
+						Location location = GetVerticalDestination(_pointerLocation);
+						PointTo(location);
+					}
 				}
 				else
 				{
-					// Move down to earliest card in stack that can be moved, or vacant depot
-					Location target = Location.Depot4;
-					switch (_pointerLocation)
-					{
-						case Location.Stock:		target = Location.Depot1;	break;
-						case Location.Waste1:
-						case Location.Waste2:
-						case Location.Waste3:		target = Location.Depot2;	break;
-						case Location.Foundation1:	target = Location.Depot4;	break;
-						case Location.Foundation2:	target = Location.Depot5;	break;
-						case Location.Foundation3:	target = Location.Depot6;	break;
-						case Location.Foundation4:	target = Location.Depot7;	break;
-					}
-					Card card = GetTopmostCard(target);
-					if (card == null)
-					{
-						PointTo(target);
-					}
-					else
-					{
-						while (card.CardBehindThis != null && card.CardBehindThis.CanBeMoved())
-						{
-							card = card.CardBehindThis;
-						}
-						PointTo(card);
-					}
+					// Move down to bottommost card in stack that can be moved, or vacant depot
+					Location location = GetVerticalDestination(_pointerLocation);
+					NavigateToDepot(location);
 				}
 			}
 
@@ -199,9 +203,13 @@ namespace Solitaire
 			{
 				if (_pointerSelection == null)
 				{
-					// Pick up card
-					if (_pointerCard != null)
+					if (IsStock(_pointerLocation))
 					{
+						DrawFromStock();
+					}
+					else if (_pointerCard != null)
+					{
+						// Pick up card
 						SetPointerSelection(_pointerCard);
 					}
 				}
@@ -233,7 +241,26 @@ namespace Solitaire
 							int index = FoundationIndex(_pointerSelection.Location);
 							_foundationTopmost[index] = newTopmost;
 						}
-						// TODO: track new topmost waste card
+						// Track new topmost waste card
+						else if (IsWaste(_pointerSelection.Location))
+						{
+							int numCardsInWaste = _waste.Count;
+							_waste.RemoveAt(numCardsInWaste - 1);
+							--numCardsInWaste;
+
+							// Cards atop the waste are revealed in sets, with the previous set being disabled so
+							// that it isn't visible behind the current set. If the new topmost waste card is
+							// disabled, that means the whole topmost set has been removed, so the next set should
+							// be enabled again to make it visible
+							if (numCardsInWaste > 0 && !_waste[numCardsInWaste - 1].isActiveAndEnabled)
+							{
+								int numCardsToEnable = Mathf.Min(NUM_WASTES, numCardsInWaste);
+								for (int i = 0; i < numCardsToEnable; ++i)
+								{
+									_waste[numCardsInWaste - 1 - i].gameObject.SetActive(true);
+								}
+							}
+						}
 
 						// Move held card
 						SetCardLocation(_pointerSelection, _pointerLocation);
@@ -255,6 +282,10 @@ namespace Solitaire
 				{
 					SetPointerSelection(null);
 				}
+			}
+			else if (draw)
+			{
+				DrawFromStock();
 			}
 
 #if UNITY_EDITOR
@@ -279,6 +310,60 @@ namespace Solitaire
 			}
 		}
 
+		private Location GetVerticalDestination(Location location)
+		{
+			switch (location)
+			{
+				case Location.Stock:		return Location.Depot1;
+				case Location.Waste1:
+				case Location.Waste2:		return Location.Depot2;
+				case Location.Waste3:		return Location.Depot3;
+				case Location.Foundation1:	return Location.Depot4;
+				case Location.Foundation2:	return Location.Depot5;
+				case Location.Foundation3:	return Location.Depot6;
+				case Location.Foundation4:	return Location.Depot7;
+				case Location.Depot1:		return Location.Stock;
+				case Location.Depot2:
+				case Location.Depot3:		return Location.Waste1;
+				case Location.Depot4:		return Location.Foundation1;
+				case Location.Depot5:		return Location.Foundation2;
+				case Location.Depot6:		return Location.Foundation3;
+				case Location.Depot7:		return Location.Foundation4;
+			}
+			return location;
+		}
+
+		private void NavigateToDepot(Location location)
+		{
+			Debug.Assert(IsDepot(location));
+			Card topmost = GetTopmostCard(location);
+			if (topmost == null)
+			{
+				// Point to base of vacant depot
+				PointTo(location);
+			}
+			else if (_pointerSelection != null)
+			{
+				// If you have a card selected, you probably want to place it on the topmost card of the depot
+				PointTo(topmost);
+			}
+			else
+			{
+				Card bottommostMovable = topmost.GetBottommostMovable();
+				if (bottommostMovable.Value == 13 && bottommostMovable.CardBehindThis == null)
+				{
+					// If you don't have a card selected, and the depot is stacked with a King at the root, you probably
+					// want to move the topmost card to a foundation, or something near the top to a different depot
+					PointTo(topmost);
+				}
+				else
+				{
+					// If you don't have a card selected, you probably want to move the largest possible stack from the depot
+					PointTo(bottommostMovable);
+				}
+			}
+		}
+
 		public Card GetTopmostCard(Location location)
 		{
 			Card topmost = null;
@@ -296,11 +381,16 @@ namespace Solitaire
 			{
 				if (_stock.Count > 0)
 				{
-					topmost = _stock[_stockIndex];
+					topmost = _stock[0];
 				}
 			}
-			// TODO: GetTopmostCard waste
-			// TODO: GetTopmostCard stock
+			else if (IsWaste(location))
+			{
+				if (_waste.Count > 0)
+				{
+					topmost = _waste[_waste.Count - 1];
+				}
+			}
 			return topmost;
 		}
 
@@ -310,12 +400,16 @@ namespace Solitaire
 			for (int i = 0; i < NUM_CARDS_IN_DECK; ++i)
 			{
 				_deck[i].Init(this, _deck[i].Suit, _deck[i].Value);
+				_deck[i].gameObject.SetActive(true);
 			}
 			if (_stock != null)
 			{
 				_stock.Clear();
 			}
-			_stockIndex = -1;
+			if (_waste != null)
+			{
+				_waste.Clear();
+			}
 			if (_depotTopmost != null)
 			{
 				for (int i = 0; i < NUM_DEPOTS; ++i)
@@ -376,10 +470,64 @@ namespace Solitaire
 				card.SetFaceUp(false);
 				_stock.Add(card);
 			}
-			_stockIndex = 0;
+			if (_waste == null)
+			{
+				_waste = new List<Card>(numRemaining);
+			}
 
 			// Start the pointer in the middle
 			PointTo(DEFAULT_LOCATION);
+		}
+
+		private void DrawFromStock()
+		{
+			// Refill the stock from the waste if the stock is empty
+			int numCardsInStock = _stock.Count;
+			int numCardsInWaste = _waste.Count;
+			if (numCardsInStock == 0)
+			{
+				if (numCardsInWaste == 0)
+				{
+					return;
+				}
+				RefillStock();
+				numCardsInStock = numCardsInWaste;
+				numCardsInWaste = 0;
+			}
+
+			// Hide any currently visible waste cards
+			int numCardsToHide = Mathf.Min(NUM_WASTES, numCardsInWaste);
+			for (int i = 0; i < numCardsToHide; ++i)
+			{
+				_waste[numCardsInWaste - 1 - i].gameObject.SetActive(false);
+			}
+
+			// Draw new cards from stock to waste
+			int numCardsToDraw = Mathf.Min(NUM_WASTES, numCardsInStock);
+			for (int i = 0; i < numCardsToDraw; ++i)
+			{
+				Card card = _stock[0];
+				_stock.RemoveAt(0);
+				_waste.Add(card);
+				card.SetFaceUp(true);
+				SetCardLocation(card, (Location)((int)Location.Waste1 + i));
+				card.RenderOrder = i;
+			}
+		}
+
+		private void RefillStock()
+		{
+			int numCards = _waste.Count;
+			for (int i = 0; i < numCards; ++i)
+			{
+				Card card = _waste[i];
+				_stock.Add(card);
+				card.gameObject.SetActive(true);
+				card.SetFaceUp(false);
+				SetCardLocation(card, Location.Stock);
+				card.RenderOrder = 0;
+			}
+			_waste.Clear();
 		}
 
 		private void SetCardLocation(Card card, Location location)
@@ -464,6 +612,14 @@ namespace Solitaire
 		{
 			bool facingRightwards = !_pointer.flipX;
 			Vector3 pos = _pointerPosition;
+
+			// Offset pointer from stock position so that it doesn't block the waste from view
+			if (_pointerLocation == Location.Stock)
+			{
+				pos += 2 * Vector3.left;
+			}
+
+			// Animate retraction forward and back to create pointing motion
 			if (facingRightwards)
 			{
 				pos += POINTER_OFFSET_FACING_RIGHTWARDS;
