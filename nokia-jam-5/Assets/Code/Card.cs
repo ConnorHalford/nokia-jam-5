@@ -32,6 +32,7 @@ namespace Solitaire
 		private Location _location = Location.Stock;
 		private Card _cardBehindThis = null;
 		private Card _cardInFrontOfThis = null;
+		private bool _revealedNaturally = false;
 
 		public Suit Suit				{ get { return _suit; } }
 		public int Value				{ get { return _value; } }
@@ -39,6 +40,7 @@ namespace Solitaire
 		public Location Location		{ get { return _location; } }
 		public Card CardBehindThis		{ get { return _cardBehindThis; } }
 		public Card CardInFrontOfThis	{ get { return _cardInFrontOfThis; } }
+		public bool RevealedNaturally	{ get { return _revealedNaturally; } set { _revealedNaturally = value; } }
 
 		public int RenderOrder	// Higher number is in front
 		{
@@ -60,16 +62,21 @@ namespace Solitaire
 			_location = Location.Stock;
 			_cardBehindThis = null;
 			_cardInFrontOfThis = null;
+			_revealedNaturally = false;
 			UpdateArt();
 			RenderOrder = 0;
 		}
 
-		public void SetFaceUp(bool faceUp)
+		public void SetFaceUp(bool faceUp, bool natural)
 		{
 			if (_faceUp != faceUp)
 			{
 				_faceUp = faceUp;
 				UpdateArt();
+			}
+			if (faceUp && natural)
+			{
+				_revealedNaturally = true;
 			}
 		}
 
@@ -129,17 +136,18 @@ namespace Solitaire
 			return topmost;
 		}
 
-		public Card GetBottommostMovable()
+		public Card GetBottommostMovable(bool canOnlyStackAlternatingColors)
 		{
 			Card bottommostMovable = this;
-			while (bottommostMovable.CardBehindThis != null && bottommostMovable.CardBehindThis.CanBeMoved())
+			while (bottommostMovable.CardBehindThis != null
+				&& bottommostMovable.CardBehindThis.CanBeMoved(canOnlyStackAlternatingColors))
 			{
 				bottommostMovable = bottommostMovable.CardBehindThis;
 			}
 			return bottommostMovable;
 		}
 
-		public bool CanBeMoved()
+		public bool CanBeMoved(bool canOnlyStackAlternatingColors)
 		{
 			bool canBeMoved = false;
 			if (InDepot())
@@ -152,7 +160,8 @@ namespace Solitaire
 					canBeMoved = true;
 					while (next != null)
 					{
-						if (next.SuitColor == current.SuitColor || next.Value != current.Value - 1)
+						if ((next.SuitColor == current.SuitColor && canOnlyStackAlternatingColors)
+							|| next.Value != current.Value - 1)
 						{
 							canBeMoved = false;
 							break;
@@ -171,7 +180,7 @@ namespace Solitaire
 		}
 
 		// Assumes that CanBeMoved is true, that should be checked first
-		public bool CanBeMovedTo(Location location)
+		public bool CanBeMovedTo(Location location, bool canOnlyStackAlternatingColors, bool canOnlyPlaceKingsInVacancies)
 		{
 			if (IsDepot(location))
 			{
@@ -179,9 +188,9 @@ namespace Solitaire
 				if (topmost == null)
 				{
 					// Only Kings can be placed in vacant depots
-					return _value == 13;
+					return _value == 13 || !canOnlyPlaceKingsInVacancies;
 				}
-				return CanBeMovedTo(topmost);
+				return CanBeMovedTo(topmost, canOnlyStackAlternatingColors);
 			}
 			if (IsFoundation(location))
 			{
@@ -191,22 +200,22 @@ namespace Solitaire
 					// Only Aces can be placed in vacant foundations
 					return _value == 1;
 				}
-				return CanBeMovedTo(topmost);
+				return CanBeMovedTo(topmost, canOnlyStackAlternatingColors);
 			}
 			return false;
 		}
 
 		// Assumes that CanBeMoved is true, that should be checked first
-		public bool CanBeMovedTo(Card other)
+		public bool CanBeMovedTo(Card other, bool canOnlyStackAlternatingColors)
 		{
 			if (other.InDepot())
 			{
 				// Alternating colors and descending value (can move stacks)
-				return other.SuitColor != this.SuitColor && other.Value == this.Value + 1;
+				return (other.SuitColor != this.SuitColor || !canOnlyStackAlternatingColors) && other.Value == this.Value + 1;
 			}
 			if (other.InFoundation())
 			{
-				// Matching suit and ascending value (only 1 card at a time)
+				// Matching suit and ascending value (can only move 1 card at a time)
 				return other.Suit == this.Suit && other.Value == this.Value - 1 && _cardInFrontOfThis == null;
 			}
 			return false;

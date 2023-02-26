@@ -19,14 +19,14 @@ GAME TODO:
 + Taking back from the foundations
 - Winning the game
 - Reshuffle and restart
-- Difficulty options
-	- Draw 1, 2 or 3 cards from stock
-	- Can only place Kings in empty depots
-	- Allowed to take cards back from foundations
-	- Tableau cards start face down or face up
-	- Stacking requires alternating colors
-- Held inputs
++ Difficulty options
+	+ Draw 1, 2 or 3 cards from stock
+	+ Can only place Kings in empty depots
+	+ Allowed to take cards back from foundations
+	+ Tableau cards start face down or face up
+	+ Stacking requires alternating colors
 + Wrap navigation
+- Held inputs
 - Title screen
 - Animate drawing
 - Animate dealing

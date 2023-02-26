@@ -87,28 +87,34 @@ namespace Solitaire
 				{
 					SetState(MenuState.Pause);
 				}
-				else if (select || right)
+				else if (select || right || left)
 				{
 					if (_highlightIndex == 0)
 					{
 						// How many cards are drawn from stock: 1/2/3
+						_solitaire.NumCardsToDrawFromStock += (left) ? -1 : 1;
 					}
 					else if (_highlightIndex == 1)
 					{
 						// What can be placed in vacant depots: Kings/Any
+						_solitaire.CanOnlyPlaceKingsInVacancies = !_solitaire.CanOnlyPlaceKingsInVacancies;
 					}
 					else if (_highlightIndex == 2)
 					{
 						// Whether you can take cards back after putting them in the foundations: Yes/No
+						_solitaire.CanTakeFromFoundation = !_solitaire.CanTakeFromFoundation;
 					}
 					else if (_highlightIndex == 3)
 					{
 						// Whether the cards in the tableau are face up or face down: Hidden/Shown
+						_solitaire.TableauFaceDown = !_solitaire.TableauFaceDown;
 					}
 					else if (_highlightIndex == 4)
 					{
 						// What color cards you can place descending values on: Opposites/Any
+						_solitaire.CanOnlyStackAlternatingColors = !_solitaire.CanOnlyStackAlternatingColors;
 					}
+					UpdateOptionsText();
 				}
 			}
 			else if (_state == MenuState.Pause)
@@ -149,17 +155,23 @@ namespace Solitaire
 
 		public void SetState(MenuState newState)
 		{
-			if (newState == MenuState.Closed || newState == MenuState.Title)
-			{
-				SetHighlight(-1);
-			}
-
 			MenuState oldState = _state;
 			_state = newState;
 			_frameStateEntered = Time.frameCount;
 			_pauseRoot.SetActive(_state == MenuState.Pause);
 			_optionsRoot.SetActive(_state == MenuState.Options);
 			_titleRoot.SetActive(_state == MenuState.Title);
+			_highlightIndex = -1;
+
+			if (newState == MenuState.Pause || newState == MenuState.Options)
+			{
+				TextMeshProUGUI[] entries = (_state == MenuState.Pause) ? _pauseText : _optionsText;
+				int numEntries = entries.Length;
+				for (int i = 0; i < numEntries; ++i)
+				{
+					entries[i].color = COLOR_DARK;
+				}
+			}
 
 			if (oldState == MenuState.Options && newState == MenuState.Pause)
 			{
@@ -168,6 +180,11 @@ namespace Solitaire
 			else if (newState == MenuState.Pause || newState == MenuState.Options)
 			{
 				SetHighlight(0);
+			}
+
+			if (newState == MenuState.Options)
+			{
+				UpdateOptionsText();
 			}
 		}
 
@@ -189,6 +206,15 @@ namespace Solitaire
 				Transform highlight = (_state == MenuState.Pause) ? _pauseHighlight : _optionsHighlight;
 				highlight.position = newText.transform.position;
 			}
+		}
+
+		private void UpdateOptionsText()
+		{
+			_optionsTextDraw.text = $"Draw: {_solitaire.NumCardsToDrawFromStock}";
+			_optionsTextVacant.text = $"Vacant: {(_solitaire.CanOnlyPlaceKingsInVacancies ? "Kings" : "Any")}";
+			_optionsTextTakeBack.text = $"Take back: {(_solitaire.CanTakeFromFoundation ? "Yes" : "No")}";
+			_optionsTextTableau.text = $"Tableau: {(_solitaire.TableauFaceDown ? "Hidden" : "Shown")}";
+			_optionsTextStack.text = $"Stack: {(_solitaire.CanOnlyStackAlternatingColors ? "Opposites" : "Any")}";
 		}
 	}
 }

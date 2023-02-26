@@ -20,14 +20,14 @@ namespace Solitaire
 
 		private Inputs _input = null;
 
-		// Don't forget to reset state in Deal
+		// Card state. Don't forget to reset in Deal
 		private Card[] _deck = null;
 		private List<Card> _stock = null;
 		private List<Card> _waste = null;
 		private Card[] _depotTopmost = null;
 		private Card[] _foundationTopmost = null;
 
-		// Don't forget to reset state in Deal
+		// Pointer state. Don't forget to reset in Deal
 		private Location _pointerLocation = DEFAULT_LOCATION;
 		private Vector3 _pointerPosition = Vector3.zero;
 		private bool _pointerRetracted = false;
@@ -35,11 +35,58 @@ namespace Solitaire
 		private Card _pointerCard = null;
 		private Card _pointerSelection = null;
 
+		// Options
+		private int _numCardsToDrawFromStock = 3;
+		private bool _canOnlyPlaceKingsInVacancies = true;
+		private bool _canTakeFromFoundation = true;
+		private bool _tableauFaceDown = true;
+		private bool _canOnlyStackAlternatingColors = true;
+
 		private const int NUM_CARDS_IN_DECK = 52;
 		private const Location DEFAULT_LOCATION = Location.Depot4;
 		private const float POINTER_DURATION = 0.4f;
 
 		public Inputs Input { get { return _input; } }
+		public int NumCardsToDrawFromStock
+		{
+			get { return _numCardsToDrawFromStock; }
+			set
+			{
+				if (value < 1)
+				{
+					value = NUM_WASTES;
+				}
+				else if (value > NUM_WASTES)
+				{
+					value = 1;
+				}
+				_numCardsToDrawFromStock = value;
+			}
+		}
+		public bool CanOnlyPlaceKingsInVacancies
+		{
+			get { return _canOnlyPlaceKingsInVacancies; }
+			set { _canOnlyPlaceKingsInVacancies = value; }
+		}
+		public bool CanTakeFromFoundation
+		{
+			get { return _canTakeFromFoundation; }
+			set { _canTakeFromFoundation = value; }
+		}
+		public bool TableauFaceDown
+		{
+			get { return _tableauFaceDown; }
+			set
+			{
+				_tableauFaceDown = value;
+				UpdateTableauFaceDown();
+			}
+		}
+		public bool CanOnlyStackAlternatingColors
+		{
+			get { return _canOnlyStackAlternatingColors; }
+			set { _canOnlyStackAlternatingColors = value; }
+		}
 
 		private void Awake()
 		{
@@ -176,7 +223,8 @@ namespace Solitaire
 				if (IsDepot(_pointerLocation))
 				{
 					// Move up to earlier card in stack that can be moved
-					if (_pointerCard != null && _pointerCard.CardBehindThis != null && _pointerCard.CardBehindThis.CanBeMoved())
+					if (_pointerCard != null && _pointerCard.CardBehindThis != null
+						&& _pointerCard.CardBehindThis.CanBeMoved(_canOnlyStackAlternatingColors))
 					{
 						PointTo(_pointerCard.CardBehindThis);
 					}
@@ -234,13 +282,17 @@ namespace Solitaire
 					else if (_pointerCard != null)
 					{
 						// Pick up card
-						SetPointerSelection(_pointerCard);
+						bool foundation = IsFoundation(_pointerLocation);
+						if (!foundation || _canTakeFromFoundation)
+						{
+							SetPointerSelection(_pointerCard);
+						}
 					}
 				}
 				else
 				{
 					// Move and drop card
-					if (_pointerSelection.CanBeMovedTo(_pointerLocation))
+					if (_pointerSelection.CanBeMovedTo(_pointerLocation, _canOnlyStackAlternatingColors, _canOnlyPlaceKingsInVacancies))
 					{
 						// Track/reveal new topmost depot card
 						if (IsDepot(_pointerSelection.Location))
@@ -248,7 +300,7 @@ namespace Solitaire
 							Card newTopmost = null;
 							if (_pointerSelection.CardBehindThis != null)
 							{
-								_pointerSelection.CardBehindThis.SetFaceUp(true);
+								_pointerSelection.CardBehindThis.SetFaceUp(true, natural: true);
 								newTopmost = _pointerSelection.CardBehindThis;
 							}
 							int index = DepotIndex(_pointerSelection.Location);
@@ -275,13 +327,26 @@ namespace Solitaire
 							// Cards atop the waste are revealed in sets, with the previous set being disabled so
 							// that it isn't visible behind the current set. If the new topmost waste card is
 							// disabled, that means the whole topmost set has been removed, so the next set should
-							// be enabled again to make it visible
+							// be enabled again to make it visible. We also want to reposition them in case the
+							// option for how many cards to draw from the waste per set has been changed since the
+							// cards were first positioned in the waste
 							if (numCardsInWaste > 0 && !_waste[numCardsInWaste - 1].isActiveAndEnabled)
 							{
-								int numCardsToEnable = Mathf.Min(NUM_WASTES, numCardsInWaste);
+								int numCardsToEnable = Mathf.Min(_numCardsToDrawFromStock, numCardsInWaste);
+								Location wasteLocation = Location.Waste3;
+								if (numCardsToEnable == 2)
+								{
+									wasteLocation = Location.Waste2;
+								}
+								else if (numCardsToEnable == 1)
+								{
+									wasteLocation = Location.Waste1;
+								}
 								for (int i = 0; i < numCardsToEnable; ++i)
 								{
-									_waste[numCardsInWaste - 1 - i].gameObject.SetActive(true);
+									Card card = _waste[numCardsInWaste - 1 - i];
+									card.gameObject.SetActive(true);
+									SetCardLocation(card, (Location)((int)wasteLocation - i));
 								}
 							}
 						}
@@ -357,7 +422,7 @@ namespace Solitaire
 			}
 			else
 			{
-				Card bottommostMovable = topmost.GetBottommostMovable();
+				Card bottommostMovable = topmost.GetBottommostMovable(_canOnlyStackAlternatingColors);
 				if (bottommostMovable.Value == 13 && bottommostMovable.CardBehindThis == null)
 				{
 					// If you don't have a card selected, and the depot is stacked with a King at the root, you probably
@@ -454,9 +519,9 @@ namespace Solitaire
 				{
 					Card card = _deck[nextCardIndex++];
 					SetCardLocation(card, (Location)((int)Location.Depot1 + depot));
-					if (depot == row)
+					if (depot == row || !_tableauFaceDown)
 					{
-						card.SetFaceUp(true);
+						card.SetFaceUp(true, natural: (depot == row));
 					}
 				}
 			}
@@ -476,7 +541,7 @@ namespace Solitaire
 			{
 				Card card = _deck[nextCardIndex++];
 				SetCardLocation(card, Location.Stock);
-				card.SetFaceUp(false);
+				card.SetFaceUp(false, natural: true);
 				_stock.Add(card);
 			}
 			if (_waste == null)
@@ -486,6 +551,39 @@ namespace Solitaire
 
 			// Start the pointer in the middle
 			PointTo(DEFAULT_LOCATION);
+		}
+
+		private void UpdateTableauFaceDown()
+		{
+			if (_tableauFaceDown)
+			{
+				// Mark cards in all depots that haven't naturally been turned over as face down
+				for (int depotIndex = 0; depotIndex < NUM_DEPOTS; ++depotIndex)
+				{
+					Card next = _depotTopmost[depotIndex];
+					while (next != null)
+					{
+						if (!next.RevealedNaturally)
+						{
+							next.SetFaceUp(false, natural: false);
+						}
+						next = next.CardBehindThis;
+					}
+				}
+			}
+			else
+			{
+				// Mark all cards in all depots as face up
+				for (int depotIndex = 0; depotIndex < NUM_DEPOTS; ++depotIndex)
+				{
+					Card next = _depotTopmost[depotIndex];
+					while (next != null)
+					{
+						next.SetFaceUp(true, natural: false);
+						next = next.CardBehindThis;
+					}
+				}
+			}
 		}
 
 		private void DrawFromStock()
@@ -505,20 +603,24 @@ namespace Solitaire
 			}
 
 			// Hide any currently visible waste cards
-			int numCardsToHide = Mathf.Min(NUM_WASTES, numCardsInWaste);
-			for (int i = 0; i < numCardsToHide; ++i)
+			for (int i = numCardsInWaste - 1; i >= 0; --i)
 			{
-				_waste[numCardsInWaste - 1 - i].gameObject.SetActive(false);
+				Card card = _waste[i];
+				if (!card.isActiveAndEnabled)
+				{
+					break;
+				}
+				card.gameObject.SetActive(false);
 			}
 
 			// Draw new cards from stock to waste
-			int numCardsToDraw = Mathf.Min(NUM_WASTES, numCardsInStock);
+			int numCardsToDraw = Mathf.Min(_numCardsToDrawFromStock, numCardsInStock);
 			for (int i = 0; i < numCardsToDraw; ++i)
 			{
 				Card card = _stock[0];
 				_stock.RemoveAt(0);
 				_waste.Add(card);
-				card.SetFaceUp(true);
+				card.SetFaceUp(true, natural: true);
 				SetCardLocation(card, (Location)((int)Location.Waste1 + i));
 				card.RenderOrder = i;
 			}
@@ -532,7 +634,7 @@ namespace Solitaire
 				Card card = _waste[i];
 				_stock.Add(card);
 				card.gameObject.SetActive(true);
-				card.SetFaceUp(false);
+				card.SetFaceUp(false, natural: true);
 				SetCardLocation(card, Location.Stock);
 				card.RenderOrder = 0;
 			}
