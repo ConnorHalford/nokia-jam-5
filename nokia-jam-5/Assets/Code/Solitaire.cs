@@ -16,6 +16,7 @@ namespace Solitaire
 		[SerializeField] private Sprite _pointerSpriteNormal = null;
 		[SerializeField] private Sprite _pointerSpriteSelected = null;
 		[SerializeField] private Transform _camera = null;
+		[SerializeField] private Menu _menu = null;
 
 		private Inputs _input = null;
 
@@ -37,6 +38,8 @@ namespace Solitaire
 		private const int NUM_CARDS_IN_DECK = 52;
 		private const Location DEFAULT_LOCATION = Location.Depot4;
 		private const float POINTER_DURATION = 0.4f;
+
+		public Inputs Input { get { return _input; } }
 
 		private void Awake()
 		{
@@ -80,6 +83,27 @@ namespace Solitaire
 		}
 
 		private void Update()
+		{
+			if (_menu.State == MenuState.Closed)
+			{
+				ProcessInput();
+			}
+
+			// Pointer animation
+			float time = Time.unscaledTime;
+			if (_timePointerAlternated <= 0.0f)
+			{
+				_timePointerAlternated = time;	// Skip over startup lag
+			}
+			else if (time - _timePointerAlternated >= POINTER_DURATION)
+			{
+				_timePointerAlternated = time + time - _timePointerAlternated - POINTER_DURATION;	// Preserve overflow
+				_pointerRetracted = !_pointerRetracted;
+				UpdatePointerPosition();
+			}
+		}
+
+		private void ProcessInput()
 		{
 			// Navigation input. Keep it simple and just prioritise different directions
 			bool right = _input.Game.Right.WasPerformedThisFrame();
@@ -277,36 +301,20 @@ namespace Solitaire
 			}
 			else if (back)
 			{
-				// Drop card
 				if (_pointerSelection != null)
 				{
+					// Drop card
 					SetPointerSelection(null);
+				}
+				else
+				{
+					// Open the menu
+					_menu.SetState(MenuState.Pause);
 				}
 			}
 			else if (draw)
 			{
 				DrawFromStock();
-			}
-
-#if UNITY_EDITOR
-			// Re-deal
-			if (_input.Game.DebugRedeal.WasPerformedThisFrame())
-			{
-				Deal();
-			}
-#endif	// UNITY_EDITOR
-
-			// Pointer animation
-			float time = Time.unscaledTime;
-			if (_timePointerAlternated <= 0.0f)
-			{
-				_timePointerAlternated = time;	// Skip over startup lag
-			}
-			else if (time - _timePointerAlternated >= POINTER_DURATION)
-			{
-				_timePointerAlternated = time + time - _timePointerAlternated - POINTER_DURATION;	// Preserve overflow
-				_pointerRetracted = !_pointerRetracted;
-				UpdatePointerPosition();
 			}
 		}
 
@@ -394,7 +402,7 @@ namespace Solitaire
 			return topmost;
 		}
 
-		private void Deal()
+		public void Deal()
 		{
 			// Reset internal state between deals
 			for (int i = 0; i < NUM_CARDS_IN_DECK; ++i)
@@ -427,6 +435,7 @@ namespace Solitaire
 			_pointerLocation = DEFAULT_LOCATION;
 			_pointerCard = null;
 			SetPointerSelection(null);
+			_camera.transform.position = new Vector3(_camera.transform.position.x, 0, _camera.transform.position.z);
 
 			// Fisher-Yates in-place shuffle
 			for (int i = 0; i <= NUM_CARDS_IN_DECK - 2; ++i)
@@ -547,10 +556,6 @@ namespace Solitaire
 				index = FoundationIndex(location);
 				topmost = _foundationTopmost[index];
 			}
-
-#if UNITY_EDITOR
-			//Debug.Log($"Placing {card.name} at location {location} atop {((topmost == null) ? "nothing" : topmost.name)}", card);
-#endif
 
 			// Place the card
 			card.SetLocation(location, topmost);

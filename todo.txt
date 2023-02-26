@@ -27,6 +27,7 @@ GAME TODO:
 	- Stacking requires alternating colors
 - Held inputs
 + Wrap navigation
+- Title screen
 - Animate drawing
 - Animate dealing
 - Animate moving stacks
@@ -37,6 +38,8 @@ META TODO:
 - Web build
 - Game description
 - Rules explanation
+- Suit and value icons legend
 - Screenshots
 - Page styling
 - Jam submission
+- GitHub readme

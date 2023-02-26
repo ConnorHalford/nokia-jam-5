@@ -58,6 +58,9 @@ namespace Solitaire
 		public static readonly Vector3 POINTER_OFFSET_FACING_RIGHTWARDS = new Vector3(-4, 0, 0);
 		public static readonly Vector3 POINTER_OFFSET_FACING_LEFTWARDS = new Vector3(15, 0, 0);
 
+		public static readonly Color COLOR_LIGHT = new Color32(199, 240, 216, 255);
+		public static readonly Color COLOR_DARK = new Color32(67, 82, 61, 255);
+
 		public static Vector3 LocationBasePosition(Location location)
 		{
 			Vector3 position = Vector3.zero;
