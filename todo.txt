@@ -35,11 +35,12 @@ GAME TODO:
 - SFX (one audio channel)
 
 META TODO:
-- Web build
-- Game description
-- Rules explanation
-- Suit and value icons legend
++ Web build
++ Game description
++ Rules explanation
++ Suit and value icons legend
++ Difficulty options explanation
 - Screenshots
-- Page styling
++ Page styling
 - Jam submission
 - GitHub readme
