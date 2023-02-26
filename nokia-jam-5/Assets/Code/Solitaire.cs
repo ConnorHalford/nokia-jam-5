@@ -359,6 +359,21 @@ namespace Solitaire
 						{
 							PointTo(_pointerSelection);
 						}
+
+						// Check win condition: Kings on all foundations
+						bool won = true;
+						for (int i = 0; i < NUM_FOUNDATIONS; ++i)
+						{
+							if (_foundationTopmost[i] == null || _foundationTopmost[i].Value != 13)
+							{
+								won = false;
+								break;
+							}
+						}
+						if (won)
+						{
+							_menu.SetState(MenuState.Win);
+						}
 					}
 					// Drop held card
 					SetPointerSelection(null);

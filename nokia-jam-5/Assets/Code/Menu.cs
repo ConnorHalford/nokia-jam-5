@@ -10,7 +10,8 @@ namespace Solitaire
 		Closed,
 		Pause,
 		Options,
-		Title
+		Title,
+		Win
 	}
 
 	public class Menu : MonoBehaviour
@@ -35,6 +36,9 @@ namespace Solitaire
 
 		[Header("Title menu")]
 		[SerializeField] private GameObject _titleRoot = null;
+
+		[Header("Win")]
+		[SerializeField] private GameObject _winRoot = null;
 
 		private MenuState _state = MenuState.Closed;
 		private int _frameStateEntered = -1;
@@ -71,6 +75,14 @@ namespace Solitaire
 				if (select || back)
 				{
 					SetState(MenuState.Closed);
+				}
+			}
+			else if (_state == MenuState.Win)
+			{
+				if (select || back)
+				{
+					SetState(MenuState.Title);
+					_solitaire.Deal();
 				}
 			}
 			else if (_state == MenuState.Options)
@@ -161,6 +173,7 @@ namespace Solitaire
 			_pauseRoot.SetActive(_state == MenuState.Pause);
 			_optionsRoot.SetActive(_state == MenuState.Options);
 			_titleRoot.SetActive(_state == MenuState.Title);
+			_winRoot.SetActive(_state == MenuState.Win);
 			_highlightIndex = -1;
 
 			if (newState == MenuState.Pause || newState == MenuState.Options)

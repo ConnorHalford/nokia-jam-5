@@ -17,8 +17,8 @@ GAME TODO:
 + Passing through the stock multiple times
 + Building on the foundations
 + Taking back from the foundations
-- Winning the game
-- Reshuffle and restart
++ Winning the game
++ Reshuffle and restart
 + Difficulty options
 	+ Draw 1, 2 or 3 cards from stock
 	+ Can only place Kings in empty depots
@@ -26,12 +26,12 @@ GAME TODO:
 	+ Tableau cards start face down or face up
 	+ Stacking requires alternating colors
 + Wrap navigation
-- Held inputs
 - Title screen
+- Auto-finish when all cards stacked
+- Held inputs
 - Animate drawing
 - Animate dealing
 - Animate moving stacks
-- Auto-finish when all cards stacked
 - SFX (one audio channel)
 
 META TODO:
