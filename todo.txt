@@ -40,7 +40,7 @@ META TODO:
 + Rules explanation
 + Suit and value icons legend
 + Difficulty options explanation
-- Screenshots
++ Screenshots
 + Page styling
-- Jam submission
-- GitHub readme
++ Jam submission
++ GitHub readme
