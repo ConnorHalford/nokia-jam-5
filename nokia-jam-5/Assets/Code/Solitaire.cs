@@ -347,6 +347,7 @@ namespace Solitaire
 									Card card = _waste[numCardsInWaste - 1 - i];
 									card.gameObject.SetActive(true);
 									SetCardLocation(card, (Location)((int)wasteLocation - i));
+									card.RenderOrder = i;
 								}
 							}
 						}
