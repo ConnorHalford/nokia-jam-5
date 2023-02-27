@@ -144,7 +144,7 @@ namespace Solitaire
 			}
 			else if (time - _timePointerAlternated >= POINTER_DURATION)
 			{
-				_timePointerAlternated = time + time - _timePointerAlternated - POINTER_DURATION;	// Preserve overflow
+				_timePointerAlternated = time;
 				_pointerRetracted = !_pointerRetracted;
 				UpdatePointerPosition();
 			}
